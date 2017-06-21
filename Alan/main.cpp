@@ -12,6 +12,11 @@ using namespace gui;
 #pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
 #endif
 
+#include "../../Ludwig/Ludwig/ludwig_net.h"
+#pragma comment(lib, "../../Ludwig/Debug/Ludwig.lib")
+
+#include "net.h"
+
 int main()
 {
 	IrrlichtDevice *device =
@@ -23,7 +28,7 @@ int main()
 	device->setWindowCaption(L"Hello World! - Irrlicht Engine Demo");
 	IVideoDriver* driver = device->getVideoDriver();
 	ISceneManager* smgr = device->getSceneManager();
-	IGUIEnvironment* guienv = device->getGUIEnvironment();
+	guienv = device->getGUIEnvironment();
 	guienv->addStaticText(L"Hello World! This is the Irrlicht Software renderer!",
 		rect<s32>(10, 10, 260, 22), true);
 
@@ -36,7 +41,6 @@ int main()
 	//IAnimatedMeshSceneNode* node = smgr->addAnimatedMeshSceneNode(mesh);
 	IMeshSceneNode* node = smgr->addSphereSceneNode();
 	
-
 	if (node)
 	{
 		node->setMaterialFlag(EMF_LIGHTING, false);
@@ -47,6 +51,11 @@ int main()
 		//addCameraSceneNode(0, vector3df(0, 30, -40), vector3df(0, 5, 0));
 	cam->setTarget(vector3df(0, 0, 0));
 	//((scene::ISceneNodeAnimatorCameraMaya*)cam)->setZoomSpeed(100.0f);
+
+	alan_acts(net_events::EVENT_TEST, acts_test);
+
+	alan_talking("127.0.0.1", 9999);
+	//alan_says(net_events::EVENT_TEST, "Hello, Friedrich!", 17);
 
 	while (device->run())
 	{
