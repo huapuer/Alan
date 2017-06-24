@@ -32,31 +32,27 @@ int main()
 	guienv->addStaticText(L"Hello World! This is the Irrlicht Software renderer!",
 		rect<s32>(10, 10, 260, 22), true);
 
-	IAnimatedMesh* mesh = smgr->getMesh("D:/irrlicht-1.8.4/media/sydney.md2");
-	if (!mesh)
-	{
-		device->drop();
-		return 1;
-	}
-	//IAnimatedMeshSceneNode* node = smgr->addAnimatedMeshSceneNode(mesh);
-	IMeshSceneNode* node = smgr->addSphereSceneNode();
+	IMeshSceneNode* node = smgr->addSphereSceneNode(1.0f,4);
+
+	ITexture* texture_red = driver->getTexture("red.bmp");
+	ITexture* texture_gray = driver->getTexture("gray.bmp");
 	
 	if (node)
 	{
 		node->setMaterialFlag(EMF_LIGHTING, false);
-		//node->setMD2Animation(scene::EMAT_STAND);
-		node->setMaterialTexture(0, driver->getTexture("D:/irrlicht-1.8.4/media/sydney.bmp"));
+		node->setMaterialTexture(0, texture_red);
 	}
 	scene::ICameraSceneNode* cam = smgr->addCameraSceneNodeMaya();
-		//addCameraSceneNode(0, vector3df(0, 30, -40), vector3df(0, 5, 0));
 	cam->setTarget(vector3df(0, 0, 0));
-	//((scene::ISceneNodeAnimatorCameraMaya*)cam)->setZoomSpeed(100.0f);
 
 	alan_acts(net_events::EVENT_TEST, acts_test);
 
-	alan_talking("127.0.0.1", 9999);
-	//alan_says(net_events::EVENT_TEST, "Hello, Friedrich!", 17);
+	//alan_talking("127.0.0.1", 9999);
+	//for (int i = 0; i < 10000; i++) {
+	//	alan_says(net_events::EVENT_TEST, "Hello, Friedrich!", 17);
+	//}
 
+	int frame_count = 0;
 	while (device->run())
 	{
 		driver->beginScene(true, true, SColor(255, 100, 101, 140));
@@ -65,6 +61,16 @@ int main()
 		guienv->drawAll();
 
 		driver->endScene();
+
+		frame_count++;
+		if (frame_count % 1000 == 0) {
+			if ((frame_count / 1000) % 2 == 0) {
+				node->setMaterialTexture(0, texture_red);
+			}
+			else {
+				node->setMaterialTexture(0, texture_gray);
+			}
+		}
 	}
 
 	device->drop();
