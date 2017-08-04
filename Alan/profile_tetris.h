@@ -3,7 +3,7 @@
 #include <stdlib.h> 
 #include <time.h>  
 #include <irrlicht.h>
-#include "../../Ludwig/Ludwig/ludwig_net.h"
+#include "../../Ludwig/Ludwig/ludwig_net_sync.h"
 
 using namespace irr;
 using namespace core;
@@ -973,6 +973,13 @@ IrrlichtDevice *device;
 video::IVideoDriver* driver;
 MyEventReceiver receiver;
 
+bool net_move_left = false;
+bool net_move_right = false;
+bool net_rotate = false;
+
+#define MODE_NET
+//#define MODE_LOCAL
+
 void frame() {
 	start:
 	switch (game_state) {
@@ -990,6 +997,7 @@ void frame() {
 			game_state = STATE_REDUCE;
 			goto start;
 		}
+#ifdef MODE_LOCAL
 		if (receiver.IsKeyDown(irr::KEY_KEY_A)) {
 			move_item_left();
 		}
@@ -999,6 +1007,19 @@ void frame() {
 		if (receiver.IsKeyDown(irr::KEY_KEY_S)) {
 			rotate_item(ROTATE_DIRECTION_CLOCKWISE);
 		}
+#endif
+
+#ifdef MODE_NET
+		if (net_move_left) {
+			move_item_left();
+		}
+		if (net_move_right) {
+			move_item_right();
+		}
+		if (net_rotate) {
+			rotate_item(ROTATE_DIRECTION_CLOCKWISE);
+		}
+#endif
 		break;
 	case STATE_REDUCE:
 		if (check_reduce()) {
@@ -1025,29 +1046,32 @@ void frame() {
 }
 
 //net
+void acts_state(char* c, int size) {
+	net_move_left = false;
+	net_move_right = false;
+	net_rotate = false;
+}
+
 void acts_move_left(char* c, int size) {
-	for (int i = 0; i < size; i++) {
-		printf("%c", c[i]);
-	}
-	printf("\n");
+	net_move_left = true;
+	net_move_right = false;
+	net_rotate = false;
 }
 
 void acts_move_right(char* c, int size) {
-	for (int i = 0; i < size; i++) {
-		printf("%c", c[i]);
-	}
-	printf("\n");
+	net_move_left = false;
+	net_move_right = true;
+	net_rotate = false;
 }
 
 void acts_rotate(char* c, int size) {
-	for (int i = 0; i < size; i++) {
-		printf("%c", c[i]);
-	}
-	printf("\n");
+	net_move_left = false;
+	net_move_right = false;
+	net_rotate = true;
 }
 
 int init() {
-
+	alan_acts(net_events::EVENT_STATE, acts_state);
 	alan_acts(net_events::EVENT_MOVE_LEFT, acts_move_left);
 	alan_acts(net_events::EVENT_MOVE_RIGHT, acts_move_right);
 	alan_acts(net_events::EVENT_ROTATE, acts_rotate);
@@ -1085,6 +1109,11 @@ bool render() {
 		}
 
 		driver->endScene();
+
+#ifdef MODE_NET
+		alan_says(net_events::EVENT_STATE, (char*)canvas, w * h * sizeof(int));
+		alan_hearing();
+#endif
 		return true;
 	}
 	return false;
