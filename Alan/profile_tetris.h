@@ -71,7 +71,7 @@ typedef void(*point_func)(int, int, void*);
 const int w = 8;
 const int h = 32;
 const int scale = 20;
-int canvas[w*h];
+char canvas[w*h];
 item current_item;
 state game_state = STATE_NEW_ITEM;
 
@@ -1111,7 +1111,7 @@ bool render() {
 		driver->endScene();
 
 #ifdef MODE_NET
-		alan_says(net_events::EVENT_STATE, (char*)canvas, w * h * sizeof(int));
+		alan_says(net_events::EVENT_STATE, canvas, w * h);
 		alan_hearing();
 #endif
 		return true;
